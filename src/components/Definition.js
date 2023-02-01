@@ -7,6 +7,9 @@ const Definition = (props) => {
         return (
             <div className="col-12">
                 {definition.definition}
+                {definition.examples.map((example) => {
+                    <p>{example}</p>
+                })}
             </div>
         )
     })
@@ -24,7 +27,7 @@ const Definition = (props) => {
             </div>
         <div className="col-4">
             <h3>
-                {word}
+                {props.word}
             </h3>
         </div>
         <div className="col-8">
@@ -32,33 +35,7 @@ const Definition = (props) => {
             <div className="row">
      
 
-                <div className="col-12">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ac libero erat. 
-                        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam 
-                        vehicula justo lectus, vitae condimentum quam tincidunt non. Donec risus lectus, semper a ligula vel, 
-                        pretium tincidunt sem. Proin leo metus, accumsan at nulla nec, ultrices maximus velit. Quisque vel nibh 
-                        vel risus luctus venenatis. Quisque suscipit sollicitudin sapien vitae commodo. Ut efficitur sollicitudin 
-                        lectus ut viverra. Cras euismod massa sit amet faucibus facilisis. Proin tristique porttitor orci at commodo.
-                            Maecenas malesuada purus nec malesuada convallis. Class aptent taciti sociosqu ad litora torquent per conubia 
-                            nostra, per inceptos himenaeos. Vestibulum eleifend neque iaculis enim placerat pretium. Proin at elementum nulla,
-                            a cursus felis. Integer quis vulputate purus. Aliquam id sodales diam, sed tincidunt magna.
-                    </p>
-                </div>
-
-                <div className="col-12">
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ac libero erat. 
-                        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam 
-                        vehicula justo lectus, vitae condimentum quam tincidunt non. Donec risus lectus, semper a ligula vel, 
-                        pretium tincidunt sem. Proin leo metus, accumsan at nulla nec, ultrices maximus velit. Quisque vel nibh 
-                        vel risus luctus venenatis. Quisque suscipit sollicitudin sapien vitae commodo. Ut efficitur sollicitudin 
-                        lectus ut viverra. Cras euismod massa sit amet faucibus facilisis. Proin tristique porttitor orci at commodo.
-                            Maecenas malesuada purus nec malesuada convallis. Class aptent taciti sociosqu ad litora torquent per conubia 
-                            nostra, per inceptos himenaeos. Vestibulum eleifend neque iaculis enim placerat pretium. Proin at elementum nulla,
-                            a cursus felis. Integer quis vulputate purus. Aliquam id sodales diam, sed tincidunt magna.
-                    </p>
-                </div>
+                {renderDefinitions}
             </div>
 
         </div>
