@@ -2,6 +2,41 @@ import React from "react"
 import "./Login.css"
 
 const Login = (props) => {
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+  
+  const emailChangeHandler = (event) =>
+  {
+  setEmail(event.target.value)
+  }
+    
+  const passwordChangeHandler = (event) =>
+  {
+  setPassword(event.target.value)
+  }
+
+
+  async function logUserIn(credentials) {
+    return fetch('http://localhost:8000/api/V1/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(credentials)
+    })
+      .then(data => data.json())
+   }
+
+   const handleLoginRequest = async e => {
+    e.preventDefault();
+    const token = await logUserIn({
+      email,
+      password
+    });
+    
+    setToken(token);
+  }
+
   return (
     <div className="Auth-form-container">
       <form className="Auth-form">
