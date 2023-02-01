@@ -11,7 +11,7 @@ const Header = (props) => {
       <ul className="navbar-nav me-auto">
         <li className="nav-item">
           <a className="nav-link" style={{color:"white"}}>Favourites 
-          <i class="fa fa-star" style={{color:"orange", margin:"2px"}} aria-hidden="true"></i>
+          <i className="fa fa-star" style={{color:"orange", margin:"2px"}} aria-hidden="true"></i>
           </a>
         </li>
       </ul>

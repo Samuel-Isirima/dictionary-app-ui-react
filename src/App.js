@@ -5,16 +5,23 @@ import Header from "./components/Header";
 import Search from "./components/Search"
 import Definition from "./components/Definition";
 import Favourites from "./components/Favourites";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
     <div className="App">
       <Header/>
-      <Search/>
-      <Login/>
-      <Register/>
-      <Definition/>
-      <Favourites/>
+<Router>
+  <Routes>
+
+  <Route path="/login" element={<Login />}/>
+  <Route path="/register" element={<Register />}/>
+  <Route path="/" element={<Search />}/>
+ 
+  </Routes>
+</Router>
+
+     
     </div>
   );
 }
