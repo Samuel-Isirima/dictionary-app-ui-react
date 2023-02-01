@@ -7,6 +7,7 @@ import axios from "axios"
 
 
 const Login = (props) => {
+  
 const [email, setEmail] = useState()
 const [password, setPassword] = useState()
 const [logInError, setLogInError] = useState()
@@ -62,10 +63,11 @@ const axiosInstance = axios.create({
       }
 
     let token = response.authorization.token
-    let user = response.authorization.user
+    let user = response.user
     //Write token to cookie
     setCookie("authToken", token, { path: '/' })
-    setCookie("authUser", user, { path: '/' })
+    setCookie("authUserName", user.user_name, { path: '/' })
+    setCookie("authUserEmail", user.email, { path: '/' })
     navigate('/')
   }
 
