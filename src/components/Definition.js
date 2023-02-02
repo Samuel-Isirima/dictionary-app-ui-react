@@ -1,3 +1,10 @@
+/*
+line 9; Imports
+line 18; Variable Definitions
+line 29; Method Definitions
+line 276; Component rendering
+*/
+
 import React, { useEffect, useState } from "react"
 import { useCookies } from 'react-cookie'
 import { useNavigate } from "react-router"
@@ -23,8 +30,8 @@ useEffect(() => {
   /*
   This hook is used to display the errors that occur during the process of adding 
   a word to favourites.
-  The !!addToFavouritesError expression is to make sure that the notifications display
-  is not triggered if the error is empty or has been reset
+  The !!addToFavouritesError expression is to make sure that whenever this hook runs, 
+  the notifications display is not triggered if the error is empty or has been reset
   */
     if(!!addToFavouritesError)  
         {
@@ -32,7 +39,14 @@ useEffect(() => {
         }
  }, [addToFavouritesError])
 
+
  useEffect(() => {
+  /*
+  This hook is used to display the errors that occur during the process of adding 
+  a removing a word from favourites.
+  The !!addToFavouritesError expression is to make sure that whenever this hook runs, 
+  the notifications display is not triggered if the error is empty or has been reset
+  */
     if(!!removeFromFavouritesError)
         {
             NotificationManager.error(`${removeFromFavouritesError}`, 'Error!', 5000);
@@ -42,13 +56,19 @@ useEffect(() => {
 
 let navigate = useNavigate()
 
-if(cookies.authToken)
+/*
+The api that runs the backend of this project uses JWT for authentication
+and this project stores the token in cookies for authentication purposes.
+Hence, if the authToken(which is the authentication cookie) exists, 
+it means the user is logged in.
+*/
+if(cookies.authToken)   
 {
 isLoggedIn = true
 }
 
 
-if(!(props.definitions && props.word))
+if(!(props.definitions && props.word))    //Return and empty element if the properties are empty
     return (<></>)    
 
 const definitions = props.definitions
@@ -62,21 +82,27 @@ const renderDefinitions = definitions.map((definition) => {
             {definition.definition}
             </p>
             {
+            /*
+            If the definition comes with examples from the api, render them, if not, 
+            render an empty element. 
+            I used the ? :  syntax
+            if true? runs : doesn't
+            */
             definition.examples? 
-            <>                    
-            <p><b>Examples</b></p>
-            {definition.examples.map((example) => {
-                return (
-                <p>
-                <i><b>{example.text}</b></i>
-                </p>
-                )
-            })
-            }
-            </>
+              <>                    
+              <p><b>Examples</b></p>
+              {definition.examples.map((example) => {
+                  return (
+                  <p>
+                  <i><b>{example.text}</b></i>
+                  </p>
+                  )
+              })
+              }
+              </>
             :
-            <>
-            </>
+              <>
+              </>
             }
             
             
@@ -89,6 +115,10 @@ const renderDefinitions = definitions.map((definition) => {
 
 function renderFavouriteActionButton()
 {
+/* 
+This method decides whether to display an "add to favourites" button or a "remove from favourites"
+based on the current state of the isInFavourites(boolean) object
+*/
     if(isInFavourites)
     {
         return (
@@ -147,47 +177,43 @@ const addToFavourites = async () =>
 setIsLoading_AddToFavourites(true)
 let request
 const headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
+//The api expects a word parameter in the put request to the add to favourites route as is specified in the options below
+try
+{
+  request = await axiosInstance({
+    url: 'favourites',
+    params: {
+      word: word,
+    },
+    method: 'POST',
+    headers: headers,
+  })
 
-  try
+}
+catch(error)
+{
+    if(error.status == 401) 
     {
-    request = await axiosInstance({
-      url: 'favourites',
-      params: {
-        word: word,
-      },
-      method: 'POST',
-      headers: headers,
-    })
+      /* 
+      By the API specification, a response status of 401 means that the user's auth token has expired, 
+      so they need to login again to validate it, hence redirect them to the login page
 
-  }
-  catch(error)
-  {
-    setIsLoading_AddToFavourites(false)
-    setAddToFavouritesError(error.response.data.message)
-    return
-  }
-  
-
-
-    const response = await request.data
-    
-    setIsLoading_AddToFavourites(false)
-
-    if(request.status !== 200)
-    {
-      if(request.status == 401)
-        {
-          setAddToFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
-          setTimeout(()=>{
-              navigate('/login')
-          }, 3000)
-          return
-        }
-    setIsLoading_AddToFavourites(false)
-    setAddToFavouritesError(response.message)
-    NotificationManager.error(`${addToFavouritesError}`, 'Error!', 5000);
+      */
+      setAddToFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
+      setTimeout(()=>{
+          navigate('/login')
+      }, 3000)
+      return
     }
 
+  setIsLoading_AddToFavourites(false)
+  setAddToFavouritesError(error.response.data.message)
+  return  
+}
+
+//If the method runs up to this place, it means it was successful with a 200 status
+const response = await request.data
+setIsLoading_AddToFavourites(false)
 NotificationManager.success(`${word} has been added to your favourites`, 'Successful!', 5000);
 setIsInFavourites(true)
 }
@@ -202,56 +228,51 @@ setIsLoading_RemoveFromFavourites(true)
 let request
 const headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
 
-  try
-    {
-    request = await axiosInstance({
-      url: `favourites/${word}`,
-      params: {
-        word: word,
-      },
-      method: 'DELETE',
-      headers: headers,
-    })
+try
+{
+  request = await axiosInstance({
+    url: `favourites/${word}`,
+    params: {
+      word: word,
+    },
+    method: 'DELETE',
+    headers: headers,
+  })
 
-  }
-  catch(error)
+}
+catch(error)
+{
+  if(request.status == 401) 
   {
-    setIsLoading_RemoveFromFavourites(false)
-    setRemoveFromFavouritesError("An unexpected error has occured. But don't worry, it's not you, it's us. Please try again later.")
-  }
-  
+    /* 
+    By the API specification, a response status of 401 means that the user's auth token has expired, 
+    so they need to login again to validate it, hence redirect them to the login page
 
-  if(!request)
-  {
-    setRemoveFromFavouritesError("An unexpected error has occured. But don't worry, it's not you, it's us. Please try again later.")
-    NotificationManager.error(`${removeFromFavouritesError}`, 'Error!', 5000);
+    */
+    setAddToFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
+    setTimeout(()=>{
+        navigate('/login')
+    }, 3000)
     return
   }
 
-    const response = await request.data
-    console.log(response)
-    
-    setIsLoading_RemoveFromFavourites(false)
+  setIsLoading_RemoveFromFavourites(false)
+  setRemoveFromFavouritesError(error.response.data.message)
+}
 
-    if(request.status !== 200)
-    {
-      if(request.status == 401)
-        {
-          setRemoveFromFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
-          setTimeout(()=>{
-              navigate('/login')
-          }, 3000)
-          return
-        }
-    setIsLoading_RemoveFromFavourites(false)
-    setRemoveFromFavouritesError(response.message)
-    NotificationManager.error(`${removeFromFavouritesError}`, 'Error!', 5000);
-    }
 
+const response = await request.data
+console.log(response)
+
+setIsLoading_RemoveFromFavourites(false)
 NotificationManager.success(`${word} has been removed from your favourites`, 'Successful!', 5000);
 setIsInFavourites(false)
 }
 
+
+/*
+Component rendering
+*/
     return (
     <div className="container-fluid bg-white" style={{padding:"40px"}}>
 

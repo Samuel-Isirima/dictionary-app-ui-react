@@ -3,6 +3,7 @@ import "./Login.css"
 import { useCookies } from 'react-cookie'
 import { useNavigate } from "react-router"
 import axios from "axios"
+import Spinner from "./Spinner"
 
 
 
@@ -18,68 +19,62 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api/v1/",
 })
 
-  const emailChangeHandler = (event) =>
-  {
-  setEmail(event.target.value)
-  }
-    
-  const passwordChangeHandler = (event) =>
-  {
-  setPassword(event.target.value)
-  }
+const emailChangeHandler = (event) =>
+{
+setEmail(event.target.value)
+}
+  
+const passwordChangeHandler = (event) =>
+{
+setPassword(event.target.value)
+}
 
 
 
-  async function logUserIn(credentials) 
-  {
-  let request
-    try
-    {
+async function logUserIn(credentials) 
+{
+let request
+try
+{
 
-    request = await axiosInstance({
-      url: 'auth/login',
-      method: 'POST',
-      data: JSON.stringify(credentials),
-      headers: { "Content-Type": "application/json" },
-    }
-    );
-  }
-  catch(error)
-  {
-    setIsLoading(false)
-    setLogInError("An unexpected error has occured. But don't worry, it's not you, it's us. Please try again later.")
-  }
-    
-    const response = await request.data
-    console.log(response)
-    
-    setIsLoading(false)
+request = await axiosInstance({
+  url: 'auth/login',
+  method: 'POST',
+  data: JSON.stringify(credentials),
+  headers: { "Content-Type": "application/json" },
+})
 
-      if(request.status !== 200)
-      {
-      setIsLoading(false)
-      setLogInError(response.message)
-      //Show error message
-      }
+}
+catch(error)
+{
+  setIsLoading(false)
+  setLogInError(error.response.data.message)
+  return
+}
+  
+const response = await request.data
+setIsLoading(false)
 
-    let token = response.authorization.token
-    let user = response.user
-    //Write token to cookie
-    setCookie("authToken", token, { path: '/' })
-    setCookie("authUserName", user.user_name, { path: '/' })
-    setCookie("authUserEmail", user.email, { path: '/' })
-    navigate('/')
-  }
+let token = response.authorization.token
+let user = response.user
 
-   const handleLoginRequest = async e => {
-    e.preventDefault()
-    setLogInError(null)
-    setIsLoading(true)
-    await logUserIn({
-      email,
-      password
-    })
-  }
+//Write token to cookie
+setCookie("authToken", token, { path: '/' })
+setCookie("authUserName", user.user_name, { path: '/' })
+setCookie("authUserEmail", user.email, { path: '/' })
+navigate('/')
+}
+
+const handleLoginRequest = async event => 
+{
+  event.preventDefault()
+  setLogInError(null)
+  setIsLoading(true)
+  await logUserIn({
+    email,
+    password
+  })
+}
 
   return (
     <div className="Auth-form-container">
@@ -112,6 +107,9 @@ const axiosInstance = axios.create({
           <div className="d-grid gap-2 mt-3">
             <button type="submit" onClick={handleLoginRequest} className="btn btn-primary" disabled={isLoading}>
               Log in
+              <span>
+              {isLoading? <Spinner/> : ''}
+              </span>
             </button>
           </div>
         </div>

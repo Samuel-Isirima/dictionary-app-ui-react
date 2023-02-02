@@ -31,7 +31,6 @@ const searchButtonActionHandler = async (event) =>
   event.preventDefault()
   setSearchError(null)
   setIsLoading(true)
-
   await getDefinition()
 }
 
@@ -50,50 +49,39 @@ const getDefinition = async () =>
   if(isLoggedIn)
   headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
   
-  try
+try
+{
+  request = await axiosInstance({
+    url: 'search',
+    params: 
     {
-    request = await axiosInstance({
-      url: 'search',
-      params: {
-        word: word,
-      },
-      method: 'GET',
-      headers: headers,
-    })
+      word: word,
+    },
+    method: 'GET',
+    headers: headers,
+  })
 
-  }
-  catch(error)
+}
+catch(error)
+{
+  if(error.request.status == 401)
   {
-    setIsLoading(false)
-    setSearchError("An unexpected error has occured. But don't worry, it's not you, it's us. Please try again later.")
-  }
-  
-
-  if(!request)
-  {
-    setSearchError("An unexpected error has occured. But don't worry, it's not you, it's us. Please try again later.")
+    setSearchError("Your login session has expired. You will be redirected to the login page to log in again.")
+    setTimeout(()=>
+    {
+      navigate('/login')
+    }, 3000)
     return
   }
 
-    const response = await request.data
-    console.log(response)
-    
-    setIsLoading(false)
+  setIsLoading(false)
+  setSearchError(error.response.data.message)
+  return
+}
 
-    if(request.status !== 200)
-    {
-      if(request.status == 401)
-        {
-          setSearchError("Your login session has expired. You will be redirected to the login page to log in again.")
-          setTimeout(()=>{
-              navigate('/login')
-          }, 3000)
-          return
-        }
-    setIsLoading(false)
-    setSearchError(response.message)
-    }
 
+const response = await request.data
+setIsLoading(false)
 setDefinition(response)
 
 }

@@ -7,24 +7,30 @@ import { Link } from "react-router-dom";
 
 const Header = (props) => {
 
-  let navigate = useNavigate()
-  let isLoggedIn = false
-  const [cookies, setCookie, removeCookie] = useCookies()
+let navigate = useNavigate()
+let isLoggedIn = false
+const [cookies, setCookie, removeCookie] = useCookies()
 
-  if(cookies.authToken)
-  {
-  isLoggedIn = true
-  }
+if(cookies.authToken)
+{
+isLoggedIn = true
+}
 
 
-  const logout = () =>
-  {
-    removeCookie("authToken")
-    removeCookie("authUserName")
-    removeCookie("authUserEmail")
+const logout = () =>
+{
+  /* 
+  The API for this project uses JWT for authentication
+  The auth tokens are stored in cookies
 
-    navigate("/")
-  }
+  Hence, to logout(destroy session), destroy the cookies
+  */
+  removeCookie("authToken")
+  removeCookie("authUserName")
+  removeCookie("authUserEmail")
+
+  navigate("/")
+}
 
   return (
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark">

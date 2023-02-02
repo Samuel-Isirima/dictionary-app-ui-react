@@ -23,6 +23,13 @@ const axiosInstance = axios.create({
 let navigate = useNavigate();
 
 useEffect(() => {
+  /*
+  This hook is used to display the errors that occur during the process of removing 
+  a word from favourites.
+  The !!addToFavouritesError expression is to make sure that whenever this hook runs, 
+  the notifications display is not triggered if the error is empty or has been reset
+  */
+
   if(!!removeFromFavouritesError)
       {
           NotificationManager.error(`${removeFromFavouritesError}`, 'Error!', 5000);
@@ -31,6 +38,13 @@ useEffect(() => {
 
 
 useEffect(() => {
+  /*
+  This hook is used to display the errors that occur during the process of adding 
+  a word to favourites.
+  The !!addToFavouritesError expression is to make sure that whenever this hook runs, 
+  the notifications display is not triggered if the error is empty or has been reset
+  */
+
   if(!!fetchFavouritesError)
       {
           NotificationManager.error(`${fetchFavouritesError}`, 'Error!', 5000);
@@ -39,14 +53,14 @@ useEffect(() => {
 
 
 useEffect(() => {
- fetchFavourites()
+//To fetch the favourites on page load
+fetchFavourites()
 }, [])
 
 
 
 const fetchFavourites = async () =>
 {
-console.log('Fetch called')
 let request, headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
 
 try
@@ -70,11 +84,10 @@ catch(error)
     }
 
   setFetchFavouritesError(error.response.data.message)
+  return
 }
 
-
 const response = await request.data
-
 setFavourites(response.data)
 
 }
@@ -84,7 +97,6 @@ setFavourites(response.data)
 const removeFromFavouritesButtonActionHandler = async (event, word) =>
 {
   event.preventDefault()
-  console.log('word ::', word)
   await removeFromFavourites(word)
 }
 
@@ -96,48 +108,40 @@ setIsLoading_RemoveFromFavourites(true)
 let request
 const headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
 
-  try
-    {
-    request = await axiosInstance({
-      url: `favourites/${word}`,
-      method: 'DELETE',
-      headers: headers,
-    })
-
-  }
-  catch(error)
+try
+{
+  request = await axiosInstance({
+  url: `favourites/${word}`,
+  method: 'DELETE',
+  headers: headers,})
+}
+catch(error)
+{
+  if(error.request.status == 401)
   {
-    if(error.request.status == 401)
-    {
-      setRemoveFromFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
-      setTimeout(()=>{
-          navigate('/login')
-      }, 3000)
-      return
-    }
-
-    setIsLoading_RemoveFromFavourites(false)
-    setRemoveFromFavouritesError(error.response.data.message)
-
+    setRemoveFromFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
+    setTimeout(()=>{
+        navigate('/login')
+    }, 3000)
     return
-    
   }
-  const newFavourites = await request.data.favourites
-  setIsLoading_RemoveFromFavourites(false)  
 
+  setIsLoading_RemoveFromFavourites(false)
+  setRemoveFromFavouritesError(error.response.data.message)
+  return
+  
+}
+const newFavourites = await request.data.favourites
+setIsLoading_RemoveFromFavourites(false)  
 
-console.log('new favourites: ', newFavourites)
 NotificationManager.success(`${word} has been removed from your favourites`, 'Successful!', 5000);
-
-setFavourites([...newFavourites])
-
+setFavourites([...newFavourites])   //Update favourites variable with copy-initialization of a new array
 }
 
 
 const renderFavourites = favourites.map((favourite) => {
   return (
           <li className="list-group-item" key={favourite.word+"-key"}>
-            
           <div>
               <p style={{float:"left"}}>{favourite.word}</p>
               <button 
@@ -150,7 +154,6 @@ const renderFavourites = favourites.map((favourite) => {
               <i className="fa fa-trash"></i>
               </button>
           </div>
-
          </li>
         )
       })
@@ -163,7 +166,6 @@ return (
         Favourites
       </h3>
     </div>
-
     <ul className="list-group list-group-flush">
       {renderFavourites}
     </ul>    
