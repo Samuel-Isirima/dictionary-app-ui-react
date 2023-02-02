@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { redirect } from "react-router"
+import { redirect, useNavigate } from "react-router"
 import "./Header.css"
 import { useCookies } from 'react-cookie';
 import avatar from "../images/avatar.png"
@@ -7,8 +7,9 @@ import { Link } from "react-router-dom";
 
 const Header = (props) => {
 
+  let navigate = useNavigate()
   let isLoggedIn = false
-  const [cookies, setCookie] = useCookies()
+  const [cookies, setCookie, removeCookie] = useCookies()
 
   if(cookies.authToken)
   {
@@ -16,33 +17,51 @@ const Header = (props) => {
   }
 
 
+  const logout = () =>
+  {
+    removeCookie("authToken")
+    removeCookie("authUserName")
+    removeCookie("authUserEmail")
+
+    navigate("/")
+  }
+
   return (
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
   <div className="container-fluid">
-    <a className="navbar-brand" >Words And Definitions</a>
+    <a className="navbar-brand" href="/" >Words And Definitions</a>
     <div className="collapse navbar-collapse">
+      {isLoggedIn?
+      <>
       <ul className="navbar-nav me-auto">
         <li className="nav-item">
-          <a className="nav-link" style={{color:"white"}}>Favourites 
+          <a className="nav-link" href="/favourites" style={{color:"white"}}>Favourites 
           <i className="fa fa-star" style={{color:"orange", margin:"2px"}} aria-hidden="true"></i>
           </a>
         </li>
       </ul>
-      <form>
+      </>
+      :
+      <>
+      </>
+      }
+      <span className="ms-auto">
             {isLoggedIn? 
             <>
             <img src={avatar} height="30" width="30" />
             <b className="me-2 p-3" style={{color:"white"}}>{cookies.authUserName}</b> 
-            <Link to="/login">
-            <button className="btn btn-primary"  type="button">Log out</button> 
-            </Link>
+            <button className="btn btn-primary"  type="button" onClick={logout}>Log out</button> 
             </>
             :
             <>
-             <button className="btn btn-primary form-control me-2" type="button">Login</button>
+            <Link to="/login">
+             <button className="btn btn-primary me-2" type="button" >Login</button>
+            </Link>
+            <Link to="/register">
             <button className="btn btn-primary" type="button">Register</button>
+            </Link>
             </>}
-      </form>
+      </span>
     </div>
   </div>
 </nav> 

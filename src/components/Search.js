@@ -5,6 +5,7 @@ import "./Search.css"
 import Definition from "./Definition"
 import { useCookies } from "react-cookie"
 import { useNavigate } from "react-router"
+import Spinner from "./Spinner"
 
 const Search = (props) => {
 let isLoggedIn = false
@@ -49,8 +50,6 @@ const getDefinition = async () =>
   if(isLoggedIn)
   headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
   
-  console.log(headers)
-
   try
     {
     request = await axiosInstance({
@@ -103,7 +102,7 @@ setDefinition(response)
 
 
 
-  return (
+return (
 <div className="container mt-5">
 
 <div className="row d-flex justify-content-center ">
@@ -121,6 +120,9 @@ setDefinition(response)
             disabled={isLoading}
             onClick={searchButtonActionHandler}>
               Go
+              <span>
+              {isLoading? <Spinner/> : ''}
+              </span>
           </button>       
           </div>
         </div>
