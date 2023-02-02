@@ -2,8 +2,19 @@ import React, { useEffect, useState } from "react"
 import useAsyncEffect from "use-async-effect"
 import axios from "axios"
 import "./Search.css"
+import Definition from "./Definition"
+import { useCookies } from "react-cookie"
+import { useNavigate } from "react-router"
 
 const Search = (props) => {
+let isLoggedIn = false
+const [cookies, setCookie] = useCookies()
+let navigate = useNavigate();
+
+if(cookies.authToken)
+{
+isLoggedIn = true
+}
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api/v1/",
@@ -25,6 +36,7 @@ const searchButtonActionHandler = async (event) =>
 
 const searchBarInputHandler = (event) =>
 {
+  setDefinition('')
   setWord(event.target.value)
 }
 
@@ -32,6 +44,12 @@ const searchBarInputHandler = (event) =>
 const getDefinition = async () =>
 {
   let request
+  let headers = {"Content-Type": "application/json"}
+
+  if(isLoggedIn)
+  headers = {"Content-Type": "application/json", "Authorization": `Bearer ${cookies.authToken}`}
+  
+  console.log(headers)
 
   try
     {
@@ -41,7 +59,7 @@ const getDefinition = async () =>
         word: word,
       },
       method: 'GET',
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
     })
 
   }
@@ -65,12 +83,19 @@ const getDefinition = async () =>
 
     if(request.status !== 200)
     {
+      if(request.status == 401)
+        {
+          setSearchError("Your login session has expired. You will be redirected to the login page to log in again.")
+          setTimeout(()=>{
+              navigate('/login')
+          }, 3000)
+          return
+        }
     setIsLoading(false)
     setSearchError(response.message)
     }
 
-
-setDefinition(response.data)
+setDefinition(response)
 
 }
 
@@ -106,7 +131,15 @@ setDefinition(response.data)
       </div>
     
   </div>
-  
+  <div className="card mt-4">
+    {
+        !!definition?
+        <Definition definitions={definition.data} word={word} isInFavourites={definition.in_favourites}/>
+        :
+        <>
+        </>
+    }
+      </div>
 </div>
 
 </div>

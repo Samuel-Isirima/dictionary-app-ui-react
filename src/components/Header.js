@@ -13,9 +13,6 @@ const Header = (props) => {
   if(cookies.authToken)
   {
   isLoggedIn = true
-  console.log('auth user ', cookies.authUserName)
-  console.log('auth user email ', cookies.authUserEmail)
-  console.log('auth user ', cookies.authToken)
   }
 
 

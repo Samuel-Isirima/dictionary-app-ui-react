@@ -3,9 +3,10 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Header from "./components/Header";
 import Search from "./components/Search"
-import Definition from "./components/Definition";
 import Favourites from "./components/Favourites";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import 'react-notifications/lib/notifications.css';
+import { NotificationContainer } from 'react-notifications';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
   <Route path="/" element={<Search />}/>
  
   </Routes>
+  <NotificationContainer/>
 </Router>
 
      
