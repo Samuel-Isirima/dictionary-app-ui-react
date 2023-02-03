@@ -192,7 +192,7 @@ try
 }
 catch(error)
 {
-    if(error.status == 401) 
+    if(error.request.status == 401) 
     {
       /* 
       By the API specification, a response status of 401 means that the user's auth token has expired, 
@@ -203,6 +203,11 @@ catch(error)
       setTimeout(()=>{
           navigate('/login')
       }, 3000)
+      return
+    }
+    else if(error.request.status == 403)  //No access for user country
+    {
+      navigate('/no-access')
       return
     }
 
@@ -242,7 +247,7 @@ try
 }
 catch(error)
 {
-  if(request.status == 401) 
+  if(error.request.status == 401) 
   {
     /* 
     By the API specification, a response status of 401 means that the user's auth token has expired, 
@@ -254,7 +259,12 @@ catch(error)
         navigate('/login')
     }, 3000)
     return
-  }
+    }
+    else if(error.request.status == 403)  //No access for user country
+    {
+      navigate('/no-access')
+      return
+    }
 
   setIsLoading_RemoveFromFavourites(false)
   setRemoveFromFavouritesError(error.response.data.message)

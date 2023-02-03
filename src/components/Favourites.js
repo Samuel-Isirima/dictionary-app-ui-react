@@ -82,6 +82,11 @@ catch(error)
       }, 3000)
       return
     }
+    else if(error.response.status == 403)  //No access for user country
+    {
+      navigate('/no-access')
+      return
+    }
 
   setFetchFavouritesError(error.response.data.message)
   return
@@ -125,6 +130,12 @@ catch(error)
     }, 3000)
     return
   }
+  else if(error.request.status == 403)  //No access for user country
+  {
+    navigate('/no-access')
+    return
+  }
+
 
   setIsLoading_RemoveFromFavourites(false)
   setRemoveFromFavouritesError(error.response.data.message)
@@ -150,6 +161,7 @@ const renderFavourites = favourites.map((favourite) => {
               style={{float:"right"}}
               word={favourite.word}
               onClick={(event) => removeFromFavouritesButtonActionHandler(event, favourite.word)}
+              disabled={isLoading_removeFromFavourites}
               >
               <i className="fa fa-trash"></i>
               </button>

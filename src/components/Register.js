@@ -67,6 +67,11 @@ try
 }
 catch(error)
 {
+  if(error.request.status == 403)  //No access for user country
+  {
+    navigate('/no-access')
+    return
+  }
   setIsLoading(false)
   setRegisterError(error.response.data.message)
   return

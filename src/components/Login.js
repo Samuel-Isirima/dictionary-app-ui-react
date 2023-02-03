@@ -47,6 +47,11 @@ request = await axiosInstance({
 }
 catch(error)
 {
+  if(error.request.status == 403)  //No access for user country
+  {
+    navigate('/no-access')
+    return
+  }
   setIsLoading(false)
   setLogInError(error.response.data.message)
   return
