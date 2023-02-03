@@ -9,7 +9,7 @@ import Spinner from "./Spinner"
 const Favourites = (props) => {
 
 let isLoggedIn = false
-const [cookies, setCookie] = useCookies()
+const [cookies, setCookie, removeCookie] = useCookies()
 const [favourites, setFavourites] = useState([])
 const [fetchFavouritesError, setFetchFavouritesError] = useState()
 const [isLoading_removeFromFavourites, setIsLoading_RemoveFromFavourites] = useState(false)
@@ -19,6 +19,21 @@ const axiosInstance = axios.create({
     baseURL: "http://localhost:8000/api/v1/",
   })
 
+  const logout = () =>
+  {
+    /* 
+    The API for this project uses JWT for authentication
+    The auth tokens are stored in cookies
+  
+    Hence, to logout(destroy session), destroy the cookies
+    */
+    removeCookie("authToken")
+    removeCookie("authUserName")
+    removeCookie("authUserEmail")
+  
+    navigate("/")
+  }
+  
 
 let navigate = useNavigate();
 
@@ -78,7 +93,7 @@ catch(error)
       setFetchFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
       setTimeout(()=>
       {
-        navigate('/login')
+        logout()
       }, 3000)
       return
     }
@@ -126,7 +141,7 @@ catch(error)
   {
     setRemoveFromFavouritesError("Your login session has expired. You will be redirected to the login page to log in again.")
     setTimeout(()=>{
-        navigate('/login')
+      logout()
     }, 3000)
     return
   }

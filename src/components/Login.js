@@ -12,7 +12,7 @@ const Login = (props) => {
 const [email, setEmail] = useState()
 const [password, setPassword] = useState()
 const [logInError, setLogInError] = useState()
-const [cookies, setCookie] = useCookies()
+const [cookies, setCookie, removeCookie] = useCookies()
 const navigate = useNavigate()
 const [isLoading, setIsLoading] = useState()
 const axiosInstance = axios.create({

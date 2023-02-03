@@ -10,7 +10,7 @@ import NotificationManager from "react-notifications/lib/NotificationManager"
 
 const Search = (props) => {
 let isLoggedIn = false
-const [cookies, setCookie] = useCookies()
+const [cookies, setCookie, removeCookie] = useCookies()
 let navigate = useNavigate();
 
 if(cookies.authToken)
@@ -23,12 +23,29 @@ const axiosInstance = axios.create({
 })
   
 const [word, setWord] = useState()
+const [searchedWord, setSearchedWord] = useState()
 const [isLoading, setIsLoading] = useState()
 const [searchError, setSearchError] = useState()
 const [definition, setDefinition] = useState()
 const [previousSearches, setPreviousSearches] = useState([])
 const [isLoading_removeFromPreviousSearches, setIsLoading_RemoveFromPreviousSearches] = useState()
 const [removeFromPreviousSearchesError, setRemoveFromPreviousSearchesError] = useState()
+const [isLoading_GetPreviousSearches, setIsLoading_GetPreviousSearches] = useState(true)
+
+const logout = () =>
+{
+  /* 
+  The API for this project uses JWT for authentication
+  The auth tokens are stored in cookies
+
+  Hence, to logout(destroy session), destroy the cookies
+  */
+  removeCookie("authToken")
+  removeCookie("authUserName")
+  removeCookie("authUserEmail")
+
+  navigate("/")
+}
 
 useEffect(() => {
   if(isLoggedIn)
@@ -53,6 +70,12 @@ useEffect(() => {
         }
   }, [removeFromPreviousSearchesError])
   
+
+  useEffect(() => 
+  {
+  fetchPreviousSearches()
+  }, [searchedWord])
+  
   
 
 const searchButtonActionHandler = async (event) =>
@@ -61,6 +84,7 @@ const searchButtonActionHandler = async (event) =>
   setSearchError(null)
   setIsLoading(true)
   await getDefinition()
+  setSearchedWord(word)
 }
 
 const searchBarInputHandler = (event) =>
@@ -98,7 +122,7 @@ catch(error)
     setSearchError("Your login session has expired. You will be redirected to the login page to log in again.")
     setTimeout(()=>
     {
-      navigate('/login')
+      logout()
     }, 3000)
     return
   }
@@ -125,6 +149,7 @@ setDefinition(response)
 
 const fetchPreviousSearches = async () =>
 {
+setIsLoading_GetPreviousSearches(true)
 if(!isLoggedIn)
   return []
 
@@ -140,12 +165,13 @@ try
 }
 catch(error)
 {
+setIsLoading_GetPreviousSearches(false)
   if(error.response.status == 401)
     {
       NotificationManager.error("Your login session has expired. You will be redirected to the login page to log in again.", "Error!", 5000)
       setTimeout(()=>
       {
-        navigate('/login')
+        logout()
       }, 3000)
       return
     }
@@ -156,20 +182,22 @@ catch(error)
     }
   return
 }
+
 const response = await request.data
+setIsLoading_GetPreviousSearches(false)
 setPreviousSearches(response.data)
 
 }
 
 
-const removeFromPreviousSearchesActionHandler = async (event, id) =>
+const removeFromPreviousSearchesActionHandler = async (event, id, word) =>
 {
   event.preventDefault()
-  await removeFromPreviousSearches(id)
+  await removeFromPreviousSearches(id, word)
 }
 
 
-const removeFromPreviousSearches = async (id) =>
+const removeFromPreviousSearches = async (id, word) =>
 {
 setIsLoading_RemoveFromPreviousSearches(true)
 let request
@@ -188,7 +216,7 @@ catch(error)
   {
     setRemoveFromPreviousSearchesError("Your login session has expired. You will be redirected to the login page to log in again.")
     setTimeout(()=>{
-        navigate('/login')
+      logout()
     }, 3000)
     return
   }
@@ -202,7 +230,7 @@ const newPreviousSearches = await request.data.searches
 console.log(request.data)
 setIsLoading_RemoveFromPreviousSearches(false)  
 
-NotificationManager.success(`${word} has been removed from your PreviousSearches`, 'Successful!', 5000);
+NotificationManager.success(`${word} has been removed from your search history.`, 'Successful!', 5000);
 setPreviousSearches([...newPreviousSearches])   //Update PreviousSearches variable with copy-initialization of a new array
 }
 
@@ -217,10 +245,11 @@ const renderPreviousSearches = previousSearches.map((search) => {
               className="btn btn-danger" 
               style={{float:"right"}}
               searchid={search.id}
-              onClick={(event) => removeFromPreviousSearchesActionHandler(event, search.id)}
+              onClick={(event) => removeFromPreviousSearchesActionHandler(event, search.id, search.word)}
               disabled={isLoading_removeFromPreviousSearches}
               >
               <i className="fa fa-trash"></i>
+              {isLoading_removeFromPreviousSearches? <Spinner/> : <></>}
               </button>
           </div>
          </li>
@@ -275,8 +304,8 @@ return (
     {
         isLoggedIn? 
         <>
-        <h4 style={{margin:"auto"}}>Previous searches</h4>
-        {renderPreviousSearches}
+        <h4 style={{margin:"auto"}}>Search History</h4>
+        {previousSearches.length? renderPreviousSearches : <p className="mt-3">You do not have any previous searches</p>}
         </>
         :
         <></>
